@@ -118,6 +118,9 @@ a { color: var(--accent); }
 .kv dd { margin: 0; min-width: 0; }
 .kv .edit { background: transparent; border: 1px solid transparent; border-radius: 3px; padding: 1px 4px; min-width: 0; white-space: pre-wrap; word-break: break-word; outline: none; }
 .kv .edit:hover, .kv .edit:focus { border-color: color-mix(in srgb, var(--fg) 20%, transparent); background: var(--card); }
+.kv .edit.auto { cursor: default; }
+.kv .edit.auto:hover { border-color: transparent; background: transparent; }
+.autoTag { display: inline-block; margin-left: 6px; font-size: 10px; line-height: 14px; padding: 0 5px; border-radius: 3px; background: var(--t-gray-bg); color: var(--t-gray-fg); vertical-align: 1px; letter-spacing: .04em; }
 @media (max-width: 520px) { .kv { grid-template-columns: 1fr; gap: 2px 0; } .kv dt { font-size: 12px; color: var(--fg-muted); margin-top: 6px; } .kv dd { padding-left: 0; } }
 
 /* 날씨 카드 */
@@ -134,6 +137,10 @@ a { color: var(--accent); }
 .clock .dday { font-size: 34px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
 .clock .time { font-size: 20px; font-variant-numeric: tabular-nums; }
 .clock .sub { color: var(--fg-muted); font-size: 13px; width: 100%; }
+.clock-rows { width: 100%; margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; align-items: center; }
+.clock-rows dt { color: var(--fg-muted); margin: 0; }
+.clock-rows dd { margin: 0; min-width: 0; }
+.clock-rows .nights { color: var(--fg-muted); margin-left: 4px; }
 .clock input[type=date], .clock input[type=number] { border: 1px solid transparent; background: transparent; border-radius: 3px; padding: 1px 4px; font-variant-numeric: tabular-nums; }
 .clock input[type=number] { width: 3.4em; text-align: right; }
 .clock input:hover, .clock input:focus { border-color: color-mix(in srgb, var(--fg) 20%, transparent); background: var(--card); outline: none; }
@@ -299,7 +306,11 @@ table.db { border-collapse: collapse; width: 100%; min-width: 900px; font-size: 
       <div class="clock">
         <div class="dday" id="dday">D-?</div>
         <div class="time" id="clock">--:--:--</div>
-        <div class="sub">출발일 <input type="date" id="startDate"> · 일수 <input type="number" id="dayCount" min="1" max="30" inputmode="numeric" aria-label="여행 일수">일 · <span id="todayText"></span></div>
+        <dl class="clock-rows">
+          <dt>출발일</dt><dd><input type="date" id="startDate" aria-label="출발일"></dd>
+          <dt>일수</dt><dd><input type="number" id="dayCount" min="1" max="30" inputmode="numeric" aria-label="여행 일수"> 일 <span class="nights" id="nightsText"></span></dd>
+          <dt>오늘</dt><dd id="todayText"></dd>
+        </dl>
       </div>
     </section>
   </div>
@@ -552,8 +563,15 @@ function cell(id, field, val, ph, table) {
 
 /* ========= 세부 정보 ========= */
 function renderDetails() {
-  $("#details").innerHTML = S.details.map((d, i) =>
-    `<dt>${esc(d.k)}:</dt><dd><div class="edit" contenteditable="true" id="det-${i}" data-i="${i}" role="textbox" aria-label="${esc(d.k)}">${esc(d.v)}</div></dd>`).join("");
+  // 일정·기간은 시간 카드의 출발일·일수에서 자동 계산 (직접 수정 불가)
+  const AUTO = { "일정": () => fmtRange(S.startDate, S.days), "기간": () => fmtNights(S.days) };
+  $("#details").innerHTML = S.details.map((d, i) => {
+    if (AUTO[d.k]) {
+      d.v = AUTO[d.k]();
+      return `<dt>${esc(d.k)}:</dt><dd><div class="edit auto" title="시간 카드의 출발일·일수에 따라 자동으로 바뀝니다">${esc(d.v)}<span class="autoTag">자동</span></div></dd>`;
+    }
+    return `<dt>${esc(d.k)}:</dt><dd><div class="edit" contenteditable="true" id="det-${i}" data-i="${i}" role="textbox" aria-label="${esc(d.k)}">${esc(d.v)}</div></dd>`;
+  }).join("");
 }
 $("#details").addEventListener("input", e => {
   const el = e.target.closest("[data-i]"); if (!el) return;
@@ -587,7 +605,8 @@ function setDays(n) {
 function tick() {
   const now = new Date();
   $("#clock").textContent = now.toLocaleTimeString("ko-KR", { hour12: false });
-  $("#todayText").textContent = "오늘 " + now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
+  $("#todayText").textContent = now.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "short" });
+  $("#nightsText").textContent = "(" + fmtNights(S.days || 4) + ")";
   const sd = new Date(S.startDate + "T00:00:00");
   if (isNaN(sd)) { $("#dday").textContent = "D-?"; return; }
   const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());

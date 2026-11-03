@@ -260,6 +260,19 @@ table.db { border-collapse: collapse; width: 100%; min-width: 900px; font-size: 
 .madd:hover { background: var(--hover); }
 @media (max-width: 700px) { [data-view="board"] { display: none; } .hint.desk { display: none; } }
 
+/* 끌어서 순서 바꾸기 */
+.drag { cursor: grab; color: var(--fg-faint); user-select: none; -webkit-user-select: none; touch-action: none; font-size: 14px; letter-spacing: -3px; padding: 2px 6px 2px 2px; line-height: 1; flex: none; }
+.drag:hover { color: var(--fg-muted); }
+.drag:active { cursor: grabbing; }
+.db .hcell { width: 22px; padding: 0 0 0 6px; }
+.db tr:hover .drag { color: var(--fg-muted); }
+.dragging { opacity: .45; }
+.dragging td, .mcard.dragging { outline: 2px dashed var(--accent); outline-offset: -2px; }
+.mv { display: inline-flex; flex-direction: column; gap: 0; flex: none; }
+.mv button { border: 0; background: transparent; color: var(--fg-faint); font-size: 9px; line-height: 1; padding: 3px 6px; cursor: pointer; border-radius: 3px; }
+.mv button:hover { background: var(--hover); color: var(--fg); }
+.mc-top .drag { margin-top: 4px; }
+
 /* 동기화 상태 */
 .sync { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--fg-muted); padding: 4px 10px; border-radius: 999px; background: var(--hover); white-space: nowrap; }
 .sync::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--fg-faint); }
@@ -634,9 +647,9 @@ function renderSchedCards() {
   return `<div class="mlist">${DAYS.map(d => {
     const rows = S.sched.filter(r => r.day === d.id);
     return `
-    <div class="mday"><span class="tag ${dayColor(d.id)}">${d.label}</span><span>${d.date} (${d.week})</span><span class="n">${rows.length}</span></div>
-    ${rows.map(r => `<div class="mcard${r.status === "완료" ? " done" : ""}" data-id="${r.id}">
-      <div class="mc-top">${cell(r.id, "act", r.act, "활동 이름", "sched")}<button class="del" type="button" data-del="sched" data-id="${r.id}" aria-label="삭제">×</button></div>
+    <div class="mday" data-day="${d.id}"><span class="tag ${dayColor(d.id)}">${d.label}</span><span>${d.date} (${d.week})</span><span class="n">${rows.length}</span></div>
+    ${rows.map(r => `<div class="mcard${r.status === "완료" ? " done" : ""}" data-id="${r.id}" data-list="sched">
+      <div class="mc-top"><span class="drag" data-t="sched" title="끌어서 순서 바꾸기">⋮⋮</span>${cell(r.id, "act", r.act, "활동 이름", "sched")}<span class="mv"><button type="button" data-move="up" data-t="sched" data-id="${r.id}" aria-label="위로">▲</button><button type="button" data-move="down" data-t="sched" data-id="${r.id}" aria-label="아래로">▼</button></span><button class="del" type="button" data-del="sched" data-id="${r.id}" aria-label="삭제">×</button></div>
       <div class="mc-chips">
         ${tagSel(dayOpts, d.label, dayColor(d.id), null, `data-t="sched" data-id="${r.id}" data-f="day"`)}
         ${tagSel(typeOpts(), r.type, null, TYPES, `data-t="sched" data-id="${r.id}" data-f="type"`)}
@@ -662,9 +675,10 @@ function renderSched() {
   const dayOpts = dayOptsOf();
   const total = rows.reduce((s, r) => s + num(r.cost), 0);
   $("#schedTable").innerHTML = `
-  <p class="hint desk">셀을 클릭해 수정 · 태그를 눌러 바꾸기 · 행 끝 ×로 삭제</p>
+  <p class="hint desk">셀을 클릭해 수정 · 태그를 눌러 바꾸기 · ⋮⋮ 를 끌어 순서 바꾸기 · 행 끝 ×로 삭제</p>
   <div class="tbl-wrap"><table class="db">
     <thead><tr>
+      <th class="hcell"></th>
       <th style="min-width:220px"><i class="ic">Aa</i>활동</th>
       <th><i class="ic">📅</i>날짜</th>
       <th><i class="ic">⏰</i>시간</th>
@@ -678,7 +692,8 @@ function renderSched() {
       <th></th>
     </tr></thead>
     <tbody>
-    ${rows.map(r => `<tr data-id="${r.id}">
+    ${rows.map(r => `<tr data-id="${r.id}" data-list="sched">
+      <td class="hcell"><span class="drag" data-t="sched" title="끌어서 순서 바꾸기">⋮⋮</span></td>
       <td><div class="title"><span class="pg">📄</span>${cell(r.id, "act", r.act, "활동 이름", "sched")}</div></td>
       <td>${tagSel(dayOpts, DAYS.find(d => d.id === r.day)?.label || (r.day + "일차"), dayColor(r.day), null, `data-t="sched" data-id="${r.id}" data-f="day"`)}</td>
       <td>${cell(r.id, "time", r.time, "시간", "sched")}</td>
@@ -691,9 +706,9 @@ function renderSched() {
       <td>${tagSel(BUDGET, r.budget, null, null, `data-t="sched" data-id="${r.id}" data-f="budget"`)}</td>
       <td><button class="del" type="button" data-del="sched" data-id="${r.id}" aria-label="삭제">×</button></td>
     </tr>`).join("")}
-    <tr class="addrow" data-add="sched"><td colspan="11">＋ 새 페이지</td></tr>
+    <tr class="addrow" data-add="sched"><td colspan="12">＋ 새 페이지</td></tr>
     </tbody>
-    <tfoot><tr><td colspan="6">개수 <b>${rows.length}</b></td><td class="num">합계 <b>${won(total)}</b></td><td class="c">예약 <b>${rows.filter(r => r.booked).length}</b></td><td colspan="3"></td></tr></tfoot>
+    <tfoot><tr><td colspan="7">개수 <b>${rows.length}</b></td><td class="num">합계 <b>${won(total)}</b></td><td class="c">예약 <b>${rows.filter(r => r.booked).length}</b></td><td colspan="3"></td></tr></tfoot>
   </table></div>`;
 }
 
@@ -744,8 +759,8 @@ function renderExp() {
   if (isMobile()) {
     $("#expTable").innerHTML = `<div class="mlist">
       <div class="mday exp"><span>모든 경비</span><span class="n">${rows.length}건 · ${won(total)}</span></div>
-      ${rows.map(r => `<div class="mcard" data-id="${r.id}">
-        <div class="mc-top">${cell(r.id, "name", r.name, "경비 이름", "exp")}<button class="del" type="button" data-del="exp" data-id="${r.id}" aria-label="삭제">×</button></div>
+      ${rows.map(r => `<div class="mcard" data-id="${r.id}" data-list="exp">
+        <div class="mc-top"><span class="drag" data-t="exp" title="끌어서 순서 바꾸기">⋮⋮</span>${cell(r.id, "name", r.name, "경비 이름", "exp")}<span class="mv"><button type="button" data-move="up" data-t="exp" data-id="${r.id}" aria-label="위로">▲</button><button type="button" data-move="down" data-t="exp" data-id="${r.id}" aria-label="아래로">▼</button></span><button class="del" type="button" data-del="exp" data-id="${r.id}" aria-label="삭제">×</button></div>
         <div class="mc-chips">
           ${tagSel(PAY, r.pay, null, null, `data-t="exp" data-id="${r.id}" data-f="pay"`)}
           ${tagSel(PSTATUS, r.status, null, null, `data-t="exp" data-id="${r.id}" data-f="status"`)}
@@ -767,6 +782,7 @@ function renderExp() {
   $("#expTable").innerHTML = `
   <div class="tbl-wrap"><table class="db">
     <thead><tr>
+      <th class="hcell"></th>
       <th style="min-width:200px"><i class="ic">Aa</i>경비</th>
       <th class="num"><i class="ic">#</i>금액</th>
       <th><i class="ic">📅</i>날짜</th>
@@ -778,7 +794,8 @@ function renderExp() {
       <th></th>
     </tr></thead>
     <tbody>
-    ${rows.map(r => `<tr data-id="${r.id}">
+    ${rows.map(r => `<tr data-id="${r.id}" data-list="exp">
+      <td class="hcell"><span class="drag" data-t="exp" title="끌어서 순서 바꾸기">⋮⋮</span></td>
       <td><div class="title"><span class="pg">📄</span>${cell(r.id, "name", r.name, "경비 이름", "exp")}</div></td>
       <td class="num">${cell(r.id, "amount", r.amount ? won(r.amount) : "", "₩0", "exp")}</td>
       <td>${cell(r.id, "date", r.date, "날짜", "exp")}</td>
@@ -789,9 +806,9 @@ function renderExp() {
       <td>${cell(r.id, "note", r.note, "메모", "exp")}</td>
       <td><button class="del" type="button" data-del="exp" data-id="${r.id}" aria-label="삭제">×</button></td>
     </tr>`).join("")}
-    <tr class="addrow" data-add="exp"><td colspan="9">＋ 새 페이지</td></tr>
+    <tr class="addrow" data-add="exp"><td colspan="10">＋ 새 페이지</td></tr>
     </tbody>
-    <tfoot><tr><td>개수 <b>${rows.length}</b></td><td class="num">합계 <b>${won(total)}</b></td><td colspan="7"></td></tr></tfoot>
+    <tfoot><tr><td colspan="2">개수 <b>${rows.length}</b></td><td class="num">합계 <b>${won(total)}</b></td><td colspan="7"></td></tr></tfoot>
   </table></div>`;
 
   renderCats(rows);
@@ -846,10 +863,99 @@ document.addEventListener("click", e => {
     if (i > -1) { arr.splice(i, 1); save(); t === "sched" ? renderSched() : renderExp(); toast("삭제했습니다"); }
     return;
   }
+  const mv = e.target.closest("[data-move]");
+  if (mv) { moveRow(mv.dataset.t, mv.dataset.id, mv.dataset.move); return; }
   const add = e.target.closest("[data-add]");
   if (add) { addRow(add.dataset.add, add.dataset.day ? Number(add.dataset.day) : null); return; }
   if (e.target.closest("[data-addday]")) setDays(S.days + 1);
 });
+/* ========= 순서 바꾸기 (끌기 + ▲▼) ========= */
+function listOf(t) { return t === "sched" ? S.sched : S.exp; }
+function rerender(t) { if (t === "sched") { renderSched(); if (S.view === "board") renderBoard(); } else renderExp(); }
+
+// DOM 순서를 읽어 배열 순서로 반영. 일정은 카드 보기의 일차 머리글 / 표의 이웃 행에서 일차를 정함
+function commitOrder(t, movedId) {
+  const container = t === "sched" ? $("#schedTable") : $("#expTable");
+  const items = [...container.querySelectorAll(`[data-list="${t}"]`)];
+  const byId = Object.fromEntries(listOf(t).map(r => [r.id, r]));
+  const ordered = items.map(el => byId[el.dataset.id]).filter(Boolean);
+  if (t === "sched") {
+    const moved = byId[movedId];
+    const el = container.querySelector(`[data-list="sched"][data-id="${movedId}"]`);
+    if (moved && el) {
+      let day = null;
+      if (el.classList.contains("mcard")) {               // 카드 보기: 바로 위 일차 머리글
+        let p = el.previousElementSibling;
+        while (p && !p.classList.contains("mday")) p = p.previousElementSibling;
+        if (p) day = Number(p.dataset.day);
+      } else {                                              // 표: 이웃 행의 일차
+        const i = items.indexOf(el);
+        const nb = items[i - 1] || items[i + 1];
+        if (nb) day = byId[nb.dataset.id]?.day;
+      }
+      if (day) moved.day = day;
+    }
+  }
+  if (t === "sched") S.sched = ordered; else S.exp = ordered;
+  save(); rerender(t);
+}
+
+// ▲▼: 같은 일차 안에서 한 칸 이동, 일차 끝에서는 옆 일차로 넘어감
+function moveRow(t, id, dir) {
+  const arr = listOf(t);
+  const i = arr.findIndex(r => r.id === id); if (i < 0) return;
+  const j = i + (dir === "up" ? -1 : 1);
+  const row = arr[i];
+  if (t === "sched") {
+    const same = arr.filter(r => r.day === row.day);
+    const k = same.indexOf(row);
+    if (dir === "up" && k === 0) { if (row.day > 1) { row.day -= 1; save(); rerender(t); } return; }
+    if (dir === "down" && k === same.length - 1) { if (row.day < S.days) { row.day += 1; arr.splice(i, 1); arr.unshift(row); save(); rerender(t); } return; }
+    // 같은 일차 안의 이웃과 자리 바꾸기
+    const nb = same[dir === "up" ? k - 1 : k + 1]; const jn = arr.indexOf(nb);
+    arr[i] = nb; arr[jn] = row;
+  } else {
+    if (j < 0 || j >= arr.length) return;
+    arr[i] = arr[j]; arr[j] = row;
+  }
+  save(); rerender(t);
+  const el = document.querySelector(`[data-list="${t}"][data-id="${id}"]`);
+  if (el) el.scrollIntoView({ block: "nearest" });
+}
+
+// 손잡이(⋮⋮)로 끌기: 마우스·터치 공통 (pointer events)
+let drag = null;
+document.addEventListener("pointerdown", e => {
+  const h = e.target.closest(".drag"); if (!h) return;
+  const item = h.closest("[data-list]"); if (!item) return;
+  drag = { t: h.dataset.t, id: item.dataset.id, item, startY: e.clientY, started: false, pointerId: e.pointerId };
+  try { h.setPointerCapture(e.pointerId); } catch (err) {}
+  e.preventDefault();
+});
+document.addEventListener("pointermove", e => {
+  if (!drag) return;
+  if (!drag.started) { if (Math.abs(e.clientY - drag.startY) < 5) return; drag.started = true; drag.item.classList.add("dragging"); }
+  e.preventDefault();
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  const over = under && under.closest(`[data-list="${drag.t}"], .mday[data-day]`);
+  if (!over || over === drag.item) return;
+  const r = over.getBoundingClientRect();
+  if (over.classList.contains("mday")) {                   // 일차 머리글 위: 그 일차의 맨 앞으로
+    over.parentElement.insertBefore(drag.item, over.nextSibling);
+    return;
+  }
+  const after = e.clientY > r.top + r.height / 2;
+  over.parentElement.insertBefore(drag.item, after ? over.nextSibling : over);
+});
+function endDrag() {
+  if (!drag) return;
+  const d = drag; drag = null;
+  d.item.classList.remove("dragging");
+  if (d.started) commitOrder(d.t, d.id);
+}
+document.addEventListener("pointerup", endDrag);
+document.addEventListener("pointercancel", endDrag);
+
 function addRow(t, day) {
   let id;
   if (t === "sched") {

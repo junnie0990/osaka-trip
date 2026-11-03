@@ -94,7 +94,7 @@ a { color: var(--accent); }
 .head .icon { font-size: 44px; line-height: 1; }
 .head h1 { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
 .head .tools { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
-.lead { color: var(--fg-muted); margin: 4px 0 22px; max-width: 70ch; }
+.head { margin-bottom: 18px; }
 
 /* 섹션 밴드 */
 .band { font-weight: 700; font-size: 15px; padding: 4px 10px; border-radius: 3px; margin: 26px 0 12px; }
@@ -116,8 +116,9 @@ a { color: var(--accent); }
 .kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; font-size: 13px; align-items: center; }
 .kv dt { color: var(--fg); font-weight: 700; margin: 0; }
 .kv dd { margin: 0; min-width: 0; }
-.kv .edit { background: transparent; border: 1px solid transparent; border-radius: 3px; padding: 1px 4px; width: 100%; min-width: 0; }
-.kv .edit:hover, .kv .edit:focus { border-color: color-mix(in srgb, var(--fg) 20%, transparent); background: var(--card); outline: none; }
+.kv .edit { background: transparent; border: 1px solid transparent; border-radius: 3px; padding: 1px 4px; min-width: 0; white-space: pre-wrap; word-break: break-word; outline: none; }
+.kv .edit:hover, .kv .edit:focus { border-color: color-mix(in srgb, var(--fg) 20%, transparent); background: var(--card); }
+@media (max-width: 520px) { .kv { grid-template-columns: 1fr; gap: 2px 0; } .kv dt { font-size: 12px; color: var(--fg-muted); margin-top: 6px; } .kv dd { padding-left: 0; } }
 
 /* 날씨 카드 */
 .wx { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: center; }
@@ -133,8 +134,9 @@ a { color: var(--accent); }
 .clock .dday { font-size: 34px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
 .clock .time { font-size: 20px; font-variant-numeric: tabular-nums; }
 .clock .sub { color: var(--fg-muted); font-size: 13px; width: 100%; }
-.clock input[type=date] { border: 1px solid transparent; background: transparent; border-radius: 3px; padding: 1px 4px; }
-.clock input[type=date]:hover, .clock input[type=date]:focus { border-color: color-mix(in srgb, var(--fg) 20%, transparent); background: var(--card); outline: none; }
+.clock input[type=date], .clock input[type=number] { border: 1px solid transparent; background: transparent; border-radius: 3px; padding: 1px 4px; font-variant-numeric: tabular-nums; }
+.clock input[type=number] { width: 3.4em; text-align: right; }
+.clock input:hover, .clock input:focus { border-color: color-mix(in srgb, var(--fg) 20%, transparent); background: var(--card); outline: none; }
 
 /* 데이터베이스 툴바 */
 .dbbar { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin: 4px 0 6px; border-bottom: 1px solid color-mix(in srgb, var(--fg) 10%, transparent); padding-bottom: 6px; }
@@ -189,7 +191,7 @@ table.db { border-collapse: collapse; width: 100%; min-width: 900px; font-size: 
 .tag .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .6; }
 
 /* 날짜별 보드 */
-.board { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 12px; overflow-x: auto; padding-bottom: 4px; }
+.board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr); gap: 12px; overflow-x: auto; padding-bottom: 4px; }
 .col h4 { margin: 0 0 8px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
 .col h4 .n { color: var(--fg-faint); font-weight: 400; }
 .col .stack { display: grid; gap: 8px; }
@@ -217,6 +219,31 @@ table.db { border-collapse: collapse; width: 100%; min-width: 900px; font-size: 
 .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(16px); background: var(--fg); color: var(--bg); padding: 8px 14px; border-radius: 6px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 20; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* 모바일 카드 목록 (좁은 화면에서 표 대신) */
+.mlist { display: grid; gap: 8px; }
+.mday { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 10px 2px 2px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--card-purple); }
+.mday.exp { background: var(--card-green); }
+.mday .n { color: var(--fg-faint); }
+.mcard { background: var(--card); border-radius: 8px; box-shadow: var(--shadow); border: 1px solid color-mix(in srgb, var(--fg) 6%, transparent); padding: 10px 12px; display: grid; gap: 6px; }
+.mcard.done { opacity: .6; }
+.mc-top { display: flex; align-items: flex-start; gap: 6px; }
+.mc-top .cell { flex: 1; font-weight: 700; font-size: 15px; line-height: 1.4; }
+.mcard .del { flex: none; border: 0; background: transparent; color: var(--fg-faint); font-size: 18px; line-height: 1; width: 28px; height: 28px; border-radius: 4px; cursor: pointer; }
+.mcard .del:hover { background: var(--t-red-bg); color: var(--t-red-fg); }
+.mc-foot .ic { opacity: .6; }
+.mc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.mc-row { display: grid; grid-template-columns: 18px 1fr; gap: 2px 6px; align-items: start; font-size: 13px; }
+.mc-row.two { grid-template-columns: 18px 1fr 18px 1fr; }
+.mc-row .ic { opacity: .6; padding-top: 3px; text-align: center; }
+.mc-row .cell { min-height: 24px; }
+.mc-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 13px; padding-top: 4px; border-top: 1px solid var(--line); }
+.mc-foot .amt { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; min-width: 60px; }
+.mc-foot label { display: inline-flex; align-items: center; gap: 4px; color: var(--fg-muted); }
+.mc-foot .sp { flex: 1; }
+.madd { border: 1px dashed color-mix(in srgb, var(--fg) 25%, transparent); background: transparent; border-radius: 8px; padding: 8px; color: var(--fg-muted); cursor: pointer; font-size: 13px; }
+.madd:hover { background: var(--hover); }
+@media (max-width: 700px) { [data-view="board"] { display: none; } .hint.desk { display: none; } }
+
 /* 동기화 상태 */
 .sync { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--fg-muted); padding: 4px 10px; border-radius: 999px; background: var(--hover); white-space: nowrap; }
 .sync::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--fg-faint); }
@@ -225,7 +252,7 @@ table.db { border-collapse: collapse; width: 100%; min-width: 900px; font-size: 
 .sync.err::before { background: #d6453d; }
 .sync.local::before { background: var(--fg-faint); }
 
-@media (max-width: 900px) { .grid3 { grid-template-columns: 1fr; } .board { grid-template-columns: repeat(4, 240px); } }
+@media (max-width: 900px) { .grid3 { grid-template-columns: 1fr; } .board { grid-auto-columns: 240px; } }
 @media (max-width: 520px) { .head h1 { font-size: 24px; } .cat { grid-template-columns: 90px 1fr 80px; } .db .del { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -239,10 +266,8 @@ table.db { border-collapse: collapse; width: 100%; min-width: 900px; font-size: 
     <div class="tools">
       <span class="sync local" id="sync" title="저장 방식">로컬 저장 모드</span>
       <button class="btn" id="copyBtn" type="button">일정 텍스트 복사</button>
-      <button class="btn" id="resetBtn" type="button">기본값으로 되돌리기</button>
     </div>
   </header>
-  <p class="lead">도톤보리 야경, 우메다 쇼핑, 신세카이 먹방, 느긋한 귀국까지. 표의 셀을 눌러 바로 고칠 수 있고, 바뀐 내용은 이 브라우저에 자동 저장됩니다.</p>
 
   <!-- ===== 스냅샷 ===== -->
   <div class="band blue">스냅샷</div>
@@ -274,7 +299,7 @@ table.db { border-collapse: collapse; width: 100%; min-width: 900px; font-size: 
       <div class="clock">
         <div class="dday" id="dday">D-?</div>
         <div class="time" id="clock">--:--:--</div>
-        <div class="sub">출발일 <input type="date" id="startDate"> · <span id="todayText"></span></div>
+        <div class="sub">출발일 <input type="date" id="startDate"> · 일수 <input type="number" id="dayCount" min="1" max="30" inputmode="numeric" aria-label="여행 일수">일 · <span id="todayText"></span></div>
       </div>
     </section>
   </div>
@@ -333,22 +358,28 @@ const PLAN_ID = "osaka-261205-k7p2qx";
 
 /* ========= 옵션(태그) 정의 ========= */
 const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
-function makeDays(startDate) {
+const MAX_DAYS = 30;
+function clampDays(n) { n = Math.round(Number(n)); return isNaN(n) ? 4 : Math.min(MAX_DAYS, Math.max(1, n)); }
+function makeDays(startDate, n) {
   const sd = new Date((startDate || "2026-12-05") + "T00:00:00");
-  return [1, 2, 3, 4].map(i => {
+  const count = clampDays(n || 4);
+  return Array.from({ length: count }, (_, k) => k + 1).map(i => {
     const d = new Date(sd); d.setDate(sd.getDate() + i - 1);
     const ok = !isNaN(d);
     return { id: i, label: i + "일차", date: ok ? `${d.getMonth() + 1}/${d.getDate()}` : "", week: ok ? WEEK[d.getDay()] : "" };
   });
 }
-let DAYS = makeDays("2026-12-05");
-function fmtRange(startDate) {
-  const d = makeDays(startDate);
+let DAYS = makeDays("2026-12-05", 4);
+function fmtRange(startDate, n) {
+  const d = makeDays(startDate, n);
   const sd = new Date(startDate + "T00:00:00");
   if (isNaN(sd)) return "";
-  return `${sd.getFullYear()}년 ${d[0].date.replace("/", "월 ")}일 (${d[0].week}) ~ ${d[3].date.replace("/", "월 ")}일 (${d[3].week})`;
+  const last = d[d.length - 1];
+  return `${sd.getFullYear()}년 ${d[0].date.replace("/", "월 ")}일 (${d[0].week}) ~ ${last.date.replace("/", "월 ")}일 (${last.week})`;
 }
-const DAY_COLOR = { 1: "blue", 2: "purple", 3: "pink", 4: "green" };
+const fmtNights = n => n <= 1 ? "당일" : `${n - 1}박 ${n}일`;
+const DAY_PALETTE = ["blue", "purple", "pink", "green", "orange", "yellow", "brown", "red", "gray"];
+const dayColor = n => DAY_PALETTE[((Number(n) || 1) - 1) % DAY_PALETTE.length];
 const TYPES = {
   "항공": { e: "✈️", c: "blue" }, "교통": { e: "🚆", c: "yellow" }, "체크인": { e: "🛎️", c: "pink" },
   "관광": { e: "📸", c: "green" }, "쇼핑": { e: "🛍️", c: "purple" }, "식사": { e: "🍽️", c: "orange" },
@@ -362,7 +393,7 @@ const PSTATUS = { "예약됨": "blue", "결제됨": "green", "예정": "gray" };
 /* ========= 기본 데이터 ========= */
 const DEFAULT_DETAILS = [
   { k: "목적지", v: "일본 오사카" },
-  { k: "일정", v: fmtRange("2026-12-05") },
+  { k: "일정", v: fmtRange("2026-12-05", 4) },
   { k: "기간", v: "3박 4일" },
   { k: "목적", v: "휴가" },
   { k: "숙소", v: "Apartment Hotel 11 Shinsaibashi 9 (신사이바시)" },
@@ -407,6 +438,7 @@ function fresh() {
   return {
     details: DEFAULT_DETAILS.map(d => ({ ...d })),
     startDate: "2026-12-05",
+    days: 4,
     budget: 0,
     sched: DEFAULT_SCHED.map((r, i) => ({ id: "s" + (i + 1), ...r })),
     exp: DEFAULT_EXP.map((r, i) => ({ id: "e" + (i + 1), ...r })),
@@ -426,12 +458,12 @@ function save() {
    - 셀을 편집 중일 때는 입력이 끊기지 않도록 편집이 끝난 뒤에 다시 그립니다. */
 let remoteRef = null, lastSynced = null, syncTimer = null, pendingRender = false;
 const clone = o => JSON.parse(JSON.stringify(o));
-const SHARED_KEYS = ["details", "startDate", "budget"];   // view 는 각자 화면 설정이라 공유하지 않음
+const SHARED_KEYS = ["details", "startDate", "days", "budget"];   // view 는 각자 화면 설정이라 공유하지 않음
 
 function setSync(cls, text) { const el = $("#sync"); if (el) { el.className = "sync " + cls; el.textContent = text; } }
 
 function toRemote(st) {
-  const out = { details: st.details, startDate: st.startDate, budget: st.budget || 0, sched: {}, exp: {} };
+  const out = { details: st.details, startDate: st.startDate, days: clampDays(st.days || 4), budget: st.budget || 0, sched: {}, exp: {} };
   st.sched.forEach((r, i) => { out.sched[r.id] = { ...r, ord: i }; });
   st.exp.forEach((r, i) => { out.exp[r.id] = { ...r, ord: i }; });
   return out;
@@ -442,6 +474,7 @@ function fromRemote(d) {
   return {
     details: Array.isArray(d.details) ? d.details : base.details,
     startDate: d.startDate || base.startDate,
+    days: clampDays(d.days || 4),
     budget: d.budget || 0,
     sched: rows(d.sched), exp: rows(d.exp),
     view: S.view || "table"
@@ -520,20 +553,37 @@ function cell(id, field, val, ph, table) {
 /* ========= 세부 정보 ========= */
 function renderDetails() {
   $("#details").innerHTML = S.details.map((d, i) =>
-    `<dt>${esc(d.k)}:</dt><dd><input class="edit" id="det-${i}" data-i="${i}" value="${esc(d.v)}" aria-label="${esc(d.k)}"></dd>`).join("");
+    `<dt>${esc(d.k)}:</dt><dd><div class="edit" contenteditable="true" id="det-${i}" data-i="${i}" role="textbox" aria-label="${esc(d.k)}">${esc(d.v)}</div></dd>`).join("");
 }
 $("#details").addEventListener("input", e => {
-  const i = e.target.dataset.i; if (i == null) return;
-  S.details[i].v = e.target.value; save();
+  const el = e.target.closest("[data-i]"); if (!el) return;
+  S.details[el.dataset.i].v = el.textContent; save();
 });
+$("#details").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); e.target.blur(); } });
 
 /* ========= 시간 / D-day ========= */
 $("#startDate").value = S.startDate;
-$("#startDate").addEventListener("change", e => {
-  S.startDate = e.target.value; DAYS = makeDays(S.startDate);
-  const d = S.details.find(x => x.k === "일정"); if (d) d.v = fmtRange(S.startDate);
+function applyDates() {
+  DAYS = makeDays(S.startDate, S.days);
+  const d = S.details.find(x => x.k === "일정"); if (d) d.v = fmtRange(S.startDate, S.days);
+  const p = S.details.find(x => x.k === "기간"); if (p) p.v = fmtNights(S.days);
+  $("#dayCount").value = S.days;
   save(); renderDetails(); tick(); renderSched(); if (S.view === "board") renderBoard();
-});
+}
+$("#startDate").addEventListener("change", e => { S.startDate = e.target.value; applyDates(); });
+$("#dayCount").addEventListener("change", e => setDays(e.target.value));
+function setDays(n) {
+  n = clampDays(n);
+  const maxUsed = S.sched.reduce((m, r) => Math.max(m, r.day), 0);
+  if (n < maxUsed) {
+    $("#dayCount").value = S.days;
+    toast(`${maxUsed}일차에 일정이 있어 ${n}일로 줄일 수 없습니다. 먼저 일정을 옮기거나 지워 주세요.`);
+    return;
+  }
+  if (n === S.days) return;
+  S.days = n; applyDates();
+  toast(`${fmtNights(n)}로 바뀌었습니다`);
+}
 function tick() {
   const now = new Date();
   $("#clock").textContent = now.toLocaleTimeString("ko-KR", { hour12: false });
@@ -547,12 +597,44 @@ function tick() {
 setInterval(tick, 1000); tick();
 
 /* ========= 일정 표 ========= */
+const isMobile = () => window.matchMedia("(max-width: 700px)").matches;
+const dayOptsOf = () => DAYS.map(d => d.label);
+const typeOpts = () => Object.fromEntries(Object.entries(TYPES).map(([k, v]) => [k, v.c]));
+
+function renderSchedCards() {
+  const dayOpts = dayOptsOf();
+  return `<div class="mlist">${DAYS.map(d => {
+    const rows = S.sched.filter(r => r.day === d.id);
+    return `
+    <div class="mday"><span class="tag ${dayColor(d.id)}">${d.label}</span><span>${d.date} (${d.week})</span><span class="n">${rows.length}</span></div>
+    ${rows.map(r => `<div class="mcard${r.status === "완료" ? " done" : ""}" data-id="${r.id}">
+      <div class="mc-top">${cell(r.id, "act", r.act, "활동 이름", "sched")}<button class="del" type="button" data-del="sched" data-id="${r.id}" aria-label="삭제">×</button></div>
+      <div class="mc-chips">
+        ${tagSel(dayOpts, d.label, dayColor(d.id), null, `data-t="sched" data-id="${r.id}" data-f="day"`)}
+        ${tagSel(typeOpts(), r.type, null, TYPES, `data-t="sched" data-id="${r.id}" data-f="type"`)}
+        ${tagSel(STATUS, r.status, null, null, `data-t="sched" data-id="${r.id}" data-f="status"`)}
+      </div>
+      <div class="mc-row two"><span class="ic">⏰</span>${cell(r.id, "time", r.time, "시간", "sched")}<span class="ic">📍</span>${cell(r.id, "place", r.place, "장소", "sched")}</div>
+      <div class="mc-row"><span class="ic">≡</span>${cell(r.id, "note", r.note, "메모", "sched")}</div>
+      <div class="mc-foot">
+        <span class="ic">#</span>${cell(r.id, "cost", r.cost ? won(r.cost) : "", "₩0", "sched")}
+        <label><input type="checkbox" class="chk" data-t="sched" data-id="${r.id}" data-f="booked" ${r.booked ? "checked" : ""}> 예약됨</label>
+        <span class="sp"></span>
+        ${tagSel(BUDGET, r.budget, null, null, `data-t="sched" data-id="${r.id}" data-f="budget"`)}
+      </div>
+    </div>`).join("")}
+    <button class="madd" type="button" data-add="sched" data-day="${d.id}">＋ ${d.label}에 일정 추가</button>`;
+  }).join("")}
+  <button class="madd" type="button" data-addday="1">＋ ${DAYS.length + 1}일차 추가 (${fmtNights(DAYS.length + 1)})</button></div>`;
+}
+
 function renderSched() {
+  if (isMobile()) { $("#schedTable").innerHTML = renderSchedCards(); return; }
   const rows = [...S.sched].sort((a, b) => a.day - b.day);
-  const dayOpts = DAYS.map(d => d.label);
+  const dayOpts = dayOptsOf();
   const total = rows.reduce((s, r) => s + num(r.cost), 0);
   $("#schedTable").innerHTML = `
-  <p class="hint">셀을 클릭해 수정 · 태그를 눌러 바꾸기 · 행 끝 ×로 삭제</p>
+  <p class="hint desk">셀을 클릭해 수정 · 태그를 눌러 바꾸기 · 행 끝 ×로 삭제</p>
   <div class="tbl-wrap"><table class="db">
     <thead><tr>
       <th style="min-width:220px"><i class="ic">Aa</i>활동</th>
@@ -570,7 +652,7 @@ function renderSched() {
     <tbody>
     ${rows.map(r => `<tr data-id="${r.id}">
       <td><div class="title"><span class="pg">📄</span>${cell(r.id, "act", r.act, "활동 이름", "sched")}</div></td>
-      <td>${tagSel(dayOpts, DAYS.find(d => d.id === r.day)?.label || "1일차", DAY_COLOR[r.day] || "gray", null, `data-t="sched" data-id="${r.id}" data-f="day"`)}</td>
+      <td>${tagSel(dayOpts, DAYS.find(d => d.id === r.day)?.label || (r.day + "일차"), dayColor(r.day), null, `data-t="sched" data-id="${r.id}" data-f="day"`)}</td>
       <td>${cell(r.id, "time", r.time, "시간", "sched")}</td>
       <td>${cell(r.id, "place", r.place, "장소", "sched")}</td>
       <td>${tagSel(Object.fromEntries(Object.entries(TYPES).map(([k, v]) => [k, v.c])), r.type, null, TYPES, `data-t="sched" data-id="${r.id}" data-f="type"`)}</td>
@@ -591,7 +673,7 @@ function renderBoard() {
   $("#schedBoard").innerHTML = `<div class="board">${DAYS.map(d => {
     const rows = S.sched.filter(r => r.day === d.id);
     return `<div class="col">
-      <h4><span class="tag ${DAY_COLOR[d.id]}">${d.label}</span> <span>${d.date} (${d.week})</span><span class="n">${rows.length}</span></h4>
+      <h4><span class="tag ${dayColor(d.id)}">${d.label}</span> <span>${d.date} (${d.week})</span><span class="n">${rows.length}</span></h4>
       <div class="stack">${rows.map(r => {
         const t = TYPES[r.type] || { e: "", c: "gray" };
         return `<div class="bcard${r.status === "완료" ? " done" : ""}">
@@ -600,10 +682,12 @@ function renderBoard() {
           <div class="m" style="margin-top:6px"><span class="tag ${t.c}">${t.e} ${esc(r.type)}</span><span class="tag ${STATUS[r.status] || "gray"}">${esc(r.status)}</span>${num(r.cost) ? `<span>${won(r.cost)}</span>` : ""}${r.booked ? `<span>☑ 예약됨</span>` : ""}</div>
           ${r.note ? `<div class="note">${esc(r.note)}</div>` : ""}
         </div>`; }).join("") || `<div class="hint">일정 없음</div>`}</div>
-    </div>`; }).join("")}</div>`;
+    </div>`; }).join("")}
+    <div class="col"><button class="madd" type="button" data-addday="1" style="width:100%">＋ ${DAYS.length + 1}일차 추가</button></div></div>`;
 }
 
 function setView(v) {
+  if (isMobile()) v = "table";
   S.view = v; save();
   document.querySelectorAll("[data-view]").forEach(b => b.classList.toggle("active", b.dataset.view === v));
   $("#schedTable").hidden = v !== "table";
@@ -628,6 +712,29 @@ function renderExp() {
     <div class="stat"><div class="l">남은 예산</div><div class="v${S.budget && remain < 0 ? " neg" : ""}">${S.budget ? won(remain) : "—"}</div></div>
     <div class="stat"><div class="l">일정표 예상 비용</div><div class="v">${won(est)}</div></div>`;
   $("#budgetInput").addEventListener("change", e => { S.budget = num(e.target.value); save(); renderExp(); });
+
+  if (isMobile()) {
+    $("#expTable").innerHTML = `<div class="mlist">
+      <div class="mday exp"><span>모든 경비</span><span class="n">${rows.length}건 · ${won(total)}</span></div>
+      ${rows.map(r => `<div class="mcard" data-id="${r.id}">
+        <div class="mc-top">${cell(r.id, "name", r.name, "경비 이름", "exp")}<button class="del" type="button" data-del="exp" data-id="${r.id}" aria-label="삭제">×</button></div>
+        <div class="mc-chips">
+          ${tagSel(PAY, r.pay, null, null, `data-t="exp" data-id="${r.id}" data-f="pay"`)}
+          ${tagSel(PSTATUS, r.status, null, null, `data-t="exp" data-id="${r.id}" data-f="status"`)}
+          ${tagSel(BUDGET, r.cat, null, null, `data-t="exp" data-id="${r.id}" data-f="cat"`)}
+        </div>
+        <div class="mc-row two"><span class="ic">📅</span>${cell(r.id, "date", r.date, "날짜", "exp")}<span class="ic">≡</span>${cell(r.id, "note", r.note, "메모", "exp")}</div>
+        <div class="mc-foot">
+          <span class="amt">${cell(r.id, "amount", r.amount ? won(r.amount) : "", "₩0", "exp")}</span>
+          <span class="sp"></span>
+          <label><input type="checkbox" class="chk" data-t="exp" data-id="${r.id}" data-f="receipt" ${r.receipt ? "checked" : ""}> 영수증</label>
+        </div>
+      </div>`).join("")}
+      <button class="madd" type="button" data-add="exp">＋ 경비 추가</button>
+    </div>`;
+    renderCats(rows);
+    return;
+  }
 
   $("#expTable").innerHTML = `
   <div class="tbl-wrap"><table class="db">
@@ -659,7 +766,9 @@ function renderExp() {
     <tfoot><tr><td>개수 <b>${rows.length}</b></td><td class="num">합계 <b>${won(total)}</b></td><td colspan="7"></td></tr></tfoot>
   </table></div>`;
 
-  // 범주별 지출
+  renderCats(rows);
+}
+function renderCats(rows) {
   const byCat = {};
   rows.forEach(r => { byCat[r.cat] = (byCat[r.cat] || 0) + num(r.amount); });
   const max = Math.max(1, ...Object.values(byCat));
@@ -710,35 +819,42 @@ document.addEventListener("click", e => {
     return;
   }
   const add = e.target.closest("[data-add]");
-  if (add) addRow(add.dataset.add);
+  if (add) { addRow(add.dataset.add, add.dataset.day ? Number(add.dataset.day) : null); return; }
+  if (e.target.closest("[data-addday]")) setDays(S.days + 1);
 });
-function addRow(t) {
+function addRow(t, day) {
+  let id;
   if (t === "sched") {
-    const lastDay = S.sched.length ? S.sched[S.sched.length - 1].day : 1;
-    S.sched.push({ id: uid("s"), act: "", day: lastDay, time: "", place: "", type: "관광", status: "계획 중", cost: 0, booked: false, note: "", budget: "기타" });
-    save(); renderSched(); if (S.view === "board") setView("table");
-    const rows = document.querySelectorAll('#schedTable tbody tr[data-id]');
-    rows[rows.length - 1]?.querySelector(".cell")?.focus();
+    const d = day || (S.sched.length ? S.sched[S.sched.length - 1].day : 1);
+    id = uid("s");
+    const row = { id, act: "", day: d, time: "", place: "", type: "관광", status: "계획 중", cost: 0, booked: false, note: "", budget: "기타" };
+    // 같은 일차의 마지막 뒤에 끼워 넣기 (없으면 맨 뒤)
+    let at = -1; S.sched.forEach((r, i) => { if (r.day === d) at = i; });
+    if (at >= 0) S.sched.splice(at + 1, 0, row); else S.sched.push(row);
+    save(); if (S.view === "board") setView("table"); else renderSched();
   } else {
-    S.exp.push({ id: uid("e"), name: "", amount: 0, date: "", pay: "카드", status: "예정", cat: "기타", receipt: false, note: "" });
+    id = uid("e");
+    S.exp.push({ id, name: "", amount: 0, date: "", pay: "카드", status: "예정", cat: "기타", receipt: false, note: "" });
     save(); renderExp();
-    const rows = document.querySelectorAll('#expTable tbody tr[data-id]');
-    rows[rows.length - 1]?.querySelector(".cell")?.focus();
   }
+  const el = document.querySelector(`[data-id="${id}"] .cell`);
+  if (el) { el.scrollIntoView({ block: "center", behavior: "smooth" }); el.focus(); }
 }
+
+// 화면 폭이 바뀌어 표 ↔ 카드 전환이 필요하면 다시 그림
+let wasMobile = isMobile();
+window.addEventListener("resize", () => {
+  const m = isMobile();
+  if (m !== wasMobile) { wasMobile = m; renderSched(); renderExp(); if (!m) setView(S.view || "table"); }
+});
 function refreshTotals() { renderExp(); /* 지출 요약은 가볍게 전체 재렌더 */ const f = $("#schedTable tfoot"); if (f) { const total = S.sched.reduce((s, r) => s + num(r.cost), 0); f.querySelector(".num b").textContent = won(total); } }
 $("#addSched").addEventListener("click", () => addRow("sched"));
 $("#addExp").addEventListener("click", () => addRow("exp"));
 
-/* ========= 초기화 / 복사 ========= */
-$("#resetBtn").addEventListener("click", () => {
-  const b = $("#resetBtn");
-  if (b.dataset.arm !== "1") { b.dataset.arm = "1"; b.textContent = "정말 되돌릴까요? 다시 클릭"; setTimeout(() => { b.dataset.arm = ""; b.textContent = "기본값으로 되돌리기"; }, 3000); return; }
-  S = fresh(); save(); b.dataset.arm = ""; b.textContent = "기본값으로 되돌리기";
-  renderAll(); toast("기본값으로 되돌렸습니다");
-});
+/* ========= 복사 ========= */
 $("#copyBtn").addEventListener("click", () => {
-  const lines = [`🗼 오사카 여행 일정 (${DAYS[0].date} ${DAYS[0].week} ~ ${DAYS[3].date} ${DAYS[3].week})`, ""];
+  const L = DAYS[DAYS.length - 1];
+  const lines = [`🗼 오사카 여행 일정 (${DAYS[0].date} ${DAYS[0].week} ~ ${L.date} ${L.week}, ${fmtNights(DAYS.length)})`, ""];
   DAYS.forEach(d => {
     lines.push(`■ ${d.label} ${d.date} (${d.week})`);
     S.sched.filter(r => r.day === d.id).forEach(r => {
@@ -757,7 +873,12 @@ $("#copyBtn").addEventListener("click", () => {
 let toastTimer;
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 1600); }
 
-function renderAll() { DAYS = makeDays(S.startDate); renderDetails(); $("#startDate").value = S.startDate; tick(); renderSched(); renderExp(); setView(S.view || "table"); }
+function renderAll() {
+  S.days = clampDays(S.days || 4);
+  DAYS = makeDays(S.startDate, S.days);
+  renderDetails(); $("#startDate").value = S.startDate; $("#dayCount").value = S.days;
+  tick(); renderSched(); renderExp(); setView(S.view || "table");
+}
 renderAll();
 startRemote();
 </script>
